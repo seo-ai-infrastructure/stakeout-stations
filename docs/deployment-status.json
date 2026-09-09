@@ -1,0 +1,132 @@
+{
+  "observed_at": "2026-09-08T21:28:16.603062+00:00",
+  "railway": {
+    "project_name": "stakeout-stations",
+    "project_id": "486ee0a9-a9d5-4309-92d9-587397ac56c6",
+    "project_url": "https://railway.com/project/486ee0a9-a9d5-4309-92d9-587397ac56c6",
+    "workspace_name": "brockmisner's Projects",
+    "environment_name": "production",
+    "environment_id": "83dbbb9f-6764-4475-8a16-7437400ca86e",
+    "redis": {
+      "service_name": "redis",
+      "service_id": "241b4f9e-5bec-44c5-964d-b679653b6b5f",
+      "image": "redis:7.4",
+      "runtime_version": "7.4.11",
+      "deployment_id": "6acefcb6-e194-4770-b747-c975912d942d",
+      "deployment_created_at": "2026-09-08T15:39:47.510Z",
+      "deployment_status": "SUCCESS",
+      "runtime_ready": true,
+      "volume": {
+        "id": "def9190b-0e0a-4e93-8393-580798863284",
+        "name": "redis-data",
+        "mount_path": "/data",
+        "size_mb": 1024,
+        "region": "us-east4-eqdc4a",
+        "appendonly_directory_observed": true
+      },
+      "networking": {
+        "public_tcp_proxy": false,
+        "public_domains": [],
+        "port": 6379,
+        "private_only": true
+      },
+      "configuration": {
+        "appendonly": "yes",
+        "appendfsync": "everysec",
+        "maxmemory_policy": "noeviction",
+        "dir": "/data",
+        "protected_mode": "yes",
+        "requirepass_variable": "REDISPASSWORD",
+        "credential_generation": "32 cryptographically random bytes encoded as hex; stored in Railway variable only",
+        "redis_url_reference": "redis://default:${{REDISPASSWORD}}@${{RAILWAY_PRIVATE_DOMAIN}}:6379"
+      },
+      "verification": {
+        "deployment_status": "passed",
+        "startup_logs": "Ready to accept connections tcp; AOF base and incremental files created",
+        "volume_mount": "passed",
+        "private_network_configuration": "passed",
+        "authenticated_ping": "not_run: connector has no container exec and Redis remains private",
+        "unauthenticated_ping_noauth": "not_run: connector has no container exec and Redis remains private",
+        "runtime_config_get": "not_run: connector has no container exec; start configuration verified instead"
+      },
+      "warnings": [
+        "Redis reports host vm.overcommit_memory is not enabled. Deployment is running; memory pressure can affect background persistence. This host setting was not changed."
+      ]
+    },
+    "telemetry_engine": {
+      "service_name": "telemetry-engine",
+      "service_id": "9456dbdf-14bd-4f89-af32-6c83d127cc7a",
+      "deployment_status": "SUCCESS",
+      "source_status": "Verified source metadata: seo-ai-infrastructure/stakeout-stations, main, ebc74f6a1fa544e665e10f10807631c7fb367599.",
+      "dockerfile": "Dockerfile.worker",
+      "healthcheck_path": "/health",
+      "healthcheck_timeout_seconds": 60,
+      "redis_url_reference": "${{redis.REDIS_URL}}",
+      "engine_enabled": false,
+      "pending_variable_names": [],
+      "remaining": [
+        "Verify authenticated Redis/Supabase connectivity before enabling the engine.",
+        "Complete real email login and tenant BYOK validation."
+      ],
+      "source_repository": "seo-ai-infrastructure/stakeout-stations",
+      "deployment_id": "4b9388e6-b469-4b8c-bdd1-7f01b058f5c2",
+      "verification": "Current source configuration is seo-ai-infrastructure/stakeout-stations main. Latest deployment is SUCCESS and runtime reports engine disabled. SUPABASE_SECRET_KEY is defined; its value and authenticated application connectivity have not been tested.",
+      "server_key_variable_present": true
+    }
+  },
+  "vercel": {
+    "name": "stakeout-stations",
+    "team_id": "team_He7O626ZZqpUA74OpqWcYRAQ",
+    "submission_id": "dpl_32Ey6utZi3UGbiNXgwvGPP1MxA7a",
+    "submitted_url": "https://stakeout-stations-51p74wpet-brockmisner13211321-6243s-projects.vercel.app",
+    "status": "READY",
+    "verification_error": null,
+    "project_id": "prj_Jss0PRlNYuoTRO7fK34oHrqefkZq",
+    "url": "https://stakeout-stations.vercel.app",
+    "mode": "authenticated",
+    "verification": "Hosted unauthenticated /api/dashboard returns 401 Sign in with your email to continue.",
+    "configuration": "Public Supabase URL/publishable key supplied as .env.production in deployment files. Set the same Vercel project environment variables before switching to Git-driven deployments."
+  },
+  "supabase": {
+    "status": "SCHEMA_APPLIED",
+    "project_id": "rgaxccniacasrabfnpsp",
+    "project_url": "https://rgaxccniacasrabfnpsp.supabase.co",
+    "organization_id": "vercel_icfg_W1IMX6ikr5rjK1BFVa4vttu9",
+    "organization_confirmed": true,
+    "migrations": [
+      "tenant_foundation",
+      "hosted_function_permissions"
+    ],
+    "verification": "Hosted tenant-isolation, mutation authorization, Vault ciphertext/decryption, worker tenant binding and outbox tests passed; all fixtures rolled back. Security advisors have no warnings; two INFO notices describe intentional no-access RLS tables.",
+    "remaining": [
+      "Complete a real email login and BYOK smoke test.",
+      "Verify authenticated worker connectivity using the configured server key."
+    ],
+    "migration_versions": [
+      "20260908195440",
+      "20260908195731"
+    ],
+    "auth_urls_status": "User confirms production Site URL and redirect configuration updated; real email login not yet tested."
+  },
+  "local_verification": {
+    "tests_passed": 55,
+    "typescript": "passed",
+    "next_production_build": "passed",
+    "worker_build": "passed",
+    "disabled_worker_health": "200 disabled",
+    "unconfigured_live_mutation": "503 blocked",
+    "browser_status": "Desktop and 390px mobile interaction checks passed. Pause/resume, station registration, key manager and official template option verified. No page errors or horizontal mobile overflow. Desktop inspector fits without clipping.",
+    "map_status": "MapLibre initializes; test browsers cannot fetch Carto style.json (net::ERR_EMPTY_RESPONSE). Explicit unavailable fallback verified. Basemap/marker rendering could not be verified in this restricted network.",
+    "database_api_tests_latest": 19,
+    "hosted_database_smoke": "passed with rollback"
+  },
+  "github": {
+    "repository": "seo-ai-infrastructure/stakeout-stations",
+    "branch": "main",
+    "url": "https://github.com/seo-ai-infrastructure/stakeout-stations",
+    "permission": "User account has push permission; connected integration cannot write.",
+    "integration_write_access": false,
+    "write_error": "403 Resource not accessible by integration when creating Git tree. Local fixes have not been pushed.",
+    "remote_commit": "ebc74f6a1fa544e665e10f10807631c7fb367599"
+  }
+}

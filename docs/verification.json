@@ -39,37 +39,5 @@
     "login_page": "GET /login returns 200 and renders email input; actual email sign-in not tested.",
     "source_sync": "GitHub integration denied Git tree creation with 403; supplied patch is not pushed.",
     "auth_urls": "User reports Site URL and redirect updated; actual email login not tested."
-  },
-  "operating_guide_audit": {
-    "date": "2026-09-08",
-    "source_baseline": "de75e657a19f52d6dd209b262af68c851ce4a8b7",
-    "production_build": "passed",
-    "typescript": "passed as part of production build",
-    "browser_check": "not run: browser absent and download timed out",
-    "worker_changed": false,
-    "database_changed": false,
-    "github_write": "403 Resource not accessible by integration",
-    "changes": [
-      "Station readiness and missing WiGLE setup messages",
-      "Recent-sample and saved-power provenance labels",
-      "Modeled accuracy labels in table and export",
-      "15 m map boundary centered on stored anchor",
-      "Audited operating guide and corrected contract documentation"
-    ],
-    "vercel_deployment": "dpl_8Jba9NB384cAVdggRjXYS2ftxgsM",
-    "vercel_status": "READY"
-  },
-  "map_inventory_release": {
-    "date": "2026-09-09",
-    "baseline_commit": "ef518dc0955b2fd2e33ad4ff1e7b177cf1ca4c12",
-    "tests_passed": 21,
-    "next_production_build": "passed",
-    "worker_typescript_build": "passed",
-    "supabase_inventory_migration": "20260909020831",
-    "hosted_rls_and_grants": "passed",
-    "map_worker_and_shared_module": "HTTP 200 JavaScript",
-    "browser_map_render": "blocked: QA browser GPUInitializationError / WebGL2 unavailable",
-    "railway_discovery": "pending latest source deployment",
-    "github_write": "403 Resource not accessible by integration"
   }
 }

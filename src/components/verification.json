@@ -1,0 +1,62 @@
+{
+  "tests_passed": 55,
+  "builds": {
+    "next": "passed",
+    "worker": "passed",
+    "typescript": "passed"
+  },
+  "browser": {
+    "desktop": [
+      1536,
+      1024
+    ],
+    "mobile": [
+      390,
+      844
+    ],
+    "checks": [
+      "dashboard page load",
+      "pause and resume ticks",
+      "demo station registration",
+      "key manager navigation",
+      "official RPA template selection",
+      "no page errors",
+      "no horizontal mobile overflow",
+      "desktop inspector actions visible"
+    ],
+    "limitations": [
+      "Carto style.json and Google Fonts requests blocked with net::ERR_EMPTY_RESPONSE in test browsers. Basemap/marker rendering not verified.",
+      "Live DuoPlus and WiGLE requests not executed; no customer credentials were supplied.",
+      "Real email login, hosted websocket delivery and live provider execution remain unverified after the user updated Auth URLs and the Railway server-key variable."
+    ]
+  },
+  "hosted": {
+    "dashboard_api": "401 when unauthenticated; Supabase configured",
+    "pause_control": "verified in deployed browser",
+    "railway_redis": "SUCCESS and ready to accept connections; private only",
+    "railway_worker": "Deployment 4b9388e6-b469-4b8c-bdd1-7f01b058f5c2 is SUCCESS. Runtime reports engine disabled. Correct repository is present in current service configuration; SUPABASE_SECRET_KEY is defined but authenticated connectivity is not yet tested.",
+    "supabase": "Hosted tenant RLS, mutation denial, outbox, Vault encrypted storage/decryption, service tenant binding passed; fixtures rolled back",
+    "login_page": "GET /login returns 200 and renders email input; actual email sign-in not tested.",
+    "source_sync": "GitHub integration denied Git tree creation with 403; supplied patch is not pushed.",
+    "auth_urls": "User reports Site URL and redirect updated; actual email login not tested."
+  },
+  "operating_guide_audit": {
+    "date": "2026-09-08",
+    "source_baseline": "de75e657a19f52d6dd209b262af68c851ce4a8b7",
+    "production_build": "passed",
+    "typescript": "passed as part of production build",
+    "browser_check": "not run: browser absent and download timed out",
+    "worker_changed": false,
+    "database_changed": false,
+    "github_write": "403 Resource not accessible by integration",
+    "changes": [
+      "Station readiness and missing WiGLE setup messages",
+      "Recent-sample and saved-power provenance labels",
+      "Modeled accuracy labels in table and export",
+      "15 m map boundary centered on stored anchor",
+      "Audited operating guide and corrected contract documentation"
+    ],
+    "vercel_deployment": "dpl_8Jba9NB384cAVdggRjXYS2ftxgsM",
+    "vercel_status": "READY"
+  }
+}

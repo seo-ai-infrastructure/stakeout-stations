@@ -1,0 +1,49 @@
+{
+  "name": "stakeout-stations",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "predev": "node scripts/prepare-map-worker.mjs",
+    "prebuild": "node scripts/prepare-map-worker.mjs",
+    "dev": "next dev --hostname 0.0.0.0",
+    "build": "next build",
+    "start": "next start --hostname 0.0.0.0",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts worker/test/*.test.ts",
+    "worker": "node --import tsx worker/src/index.ts",
+    "worker:build": "tsc -p worker/tsconfig.json"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.116.0",
+    "@tanstack/react-table": "9.2.4",
+    "bullmq": "6.3.4",
+    "clsx": "2.1.1",
+    "ioredis": "6.0.0",
+    "lucide-react": "1.43.0",
+    "maplibre-gl": "6.8.0",
+    "next": "16.3.4",
+    "nodes2ts": "4.0.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "recharts": "3.10.1",
+    "server-only": "0.0.1",
+    "tailwind-merge": "3.6.0",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/geojson": "7946.0.16",
+    "@types/node": "26.5.0",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "supabase": "2.117.0",
+    "tailwindcss": "4.3.3",
+    "tsx": "4.23.13",
+    "typescript": "7.0.2"
+  }
+}

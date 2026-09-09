@@ -1,0 +1,14 @@
+node_modules/
+.next/
+.vercel/
+.env*
+!.env.example
+worker/dist/
+dist-worker/
+*.tsbuildinfo
+coverage/
+artifacts/
+supabase/.temp/
+
+# Generated from the pinned MapLibre dependency before builds.
+/public/maplibre/

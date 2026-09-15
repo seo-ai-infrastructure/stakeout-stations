@@ -1,0 +1,12 @@
+export type Power = 'off'|'on'|'starting'|'configuring'|'expired'|'unknown';
+export type JobStatus = 'queued'|'starting'|'submitting'|'running'|'stopping'|'attention'|'completed'|'failed'|'cancelled'|'missed';
+export type Parameter = {key:string;type:'string'|'number'|'boolean'|'textarea'|'file'|'excel';required:boolean;defaultValue?:string};
+export type Device = {id:string;external_id:string;name:string;client:string;city:string;latitude:number|null;longitude:number|null;timezone:string;power:Power;enabled:boolean;last_seen:string|null;expired_at:string|null};
+export type Template = {id:string;external_id:string;name:string;description:string;app:string;template_type:1|2;parameters:Parameter[];variables_confirmed:boolean;duration_minutes:number;version:number};
+export type Schedule = {id:string;name:string;device_ids:string[];template_ids:string[];frequency:'daily'|'weekly'|'once';days:number[];start_date:string;end_date:string|null;start_time:string;end_time:string;timezone:string;variables:Record<string,string>;enabled:boolean;priority:number};
+export type Job = {id:string;device_id:string;template_id:string;schedule_id:string|null;status:JobStatus;due_at:string;deadline_at:string;started_at:string|null;finished_at:string|null;created_at:string;position:number;attempt:number;error:string|null;provider_name:string;provider_records?:unknown;template_snapshot:Template;variables:Record<string,string>;outcome?:'completed'|'failed'|null;submission_at?:string|null;power_requested_at?:string|null};
+export type Event = {id:string;message:string;created_at:string;kind:string};
+export type Workspace = {id:string;name:string;capacity:number;paused:boolean;timezone:string;provider_timezone:string;connected:boolean;sync_requested:boolean;last_sync:string|null;last_heartbeat:string|null;last_error:string|null;exclusive_control:boolean;verified_capacity:number|null};
+export type State = {workspace:Workspace;devices:Device[];templates:Template[];schedules:Schedule[];jobs:Job[];events:Event[]};
+export const activeStatuses:JobStatus[]=['starting','submitting','running','stopping','attention'];
+export const terminalStatuses:JobStatus[]=['completed','failed','cancelled','missed'];

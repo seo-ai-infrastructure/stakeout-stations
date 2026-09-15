@@ -1,0 +1,41 @@
+begin;
+-- Disposable fixtures: this entire transaction rolls back.
+do $$ declare u uuid:=gen_random_uuid();other uuid:=gen_random_uuid();worker uuid:=gen_random_uuid();d uuid;t uuid;n int;claimed uuid;begin
+ insert into auth.users(id,email) values(u,u::text||'@command-test.invalid'),(other,other::text||'@command-test.invalid');
+ perform set_config('request.jwt.claim.sub',u::text,true);
+ perform public.cmd_action('bootstrap','{}');
+ perform public.cmd_action('connect',jsonb_build_object('key','test-key-never-sent-to-provider-'||u));
+ if public.cmd_worker_key(u)<>'test-key-never-sent-to-provider-'||u then raise exception 'Vault round trip failed';end if;
+ update public.cmd_workspaces set paused=false,exclusive_control=true,last_sync=now(),verified_capacity=3 where id=u;
+ insert into public.cmd_workspaces(id) values(other);
+ insert into public.cmd_templates(workspace_id,external_id,name,variables_confirmed) values(u,'test','Test workflow',true) returning id into t;
+ for n in 1..10 loop
+  insert into public.cmd_devices(workspace_id,external_id,name,power,enabled) values(u,'phone-'||n,'Phone '||n,'off',true) returning id into d;
+  insert into public.cmd_jobs(workspace_id,occurrence_key,device_id,template_id,due_at,deadline_at,provider_name,template_snapshot) values(u,'run-'||n,d,t,now()-interval '1 minute',now()+interval '1 hour','test-run-'||n,'{}');
+ end loop;
+ if not public.cmd_worker_lease(u,worker) then raise exception 'Initial lease failed';end if;
+ perform public.cmd_claim(u,worker);perform public.cmd_claim(u,worker);perform public.cmd_claim(u,worker);perform public.cmd_claim(u,worker);
+ select count(*) into n from public.cmd_jobs where workspace_id=u and status='starting';if n<>3 then raise exception 'Capacity invariant failed: %',n;end if;
+ if public.cmd_worker_lease(u,gen_random_uuid()) then raise exception 'Second worker stole lease';end if;
+ select id into claimed from public.cmd_jobs where workspace_id=u and status='starting' limit 1;
+ update public.cmd_jobs set status='stopping' where id=claimed;
+ perform public.cmd_claim(u,worker);
+ select count(*) into n from public.cmd_jobs where workspace_id=u and status in ('starting','stopping');if n<>3 then raise exception 'Shutdown released slot early';end if;
+ update public.cmd_jobs set status='completed' where id=claimed;
+ perform public.cmd_claim(u,worker);
+ select count(*) into n from public.cmd_jobs where workspace_id=u and status='starting';if n<>3 then raise exception 'Released slot was not refilled';end if;
+ update public.cmd_workspaces set verified_capacity=1 where id=u;perform public.cmd_claim(u,worker);
+ select count(*) into n from public.cmd_jobs where workspace_id=u and status='starting';if n<>3 then raise exception 'Capacity reduction interrupted active jobs';end if;
+ perform set_config('command.test_owner',u::text,true);
+ perform set_config('command.test_other',other::text,true);
+end $$;
+set local role authenticated;
+do $$ declare n int;begin
+ select count(*) into n from public.cmd_workspaces;if n<>1 then raise exception 'Tenant isolation failed: %',n;end if;
+ begin perform public.cmd_action('device',jsonb_build_object('id',gen_random_uuid(),'timezone','UTC','client','Test','city','Test','enabled',true));raise exception 'Cross-tenant mutation accepted';exception when others then if sqlerrm='Cross-tenant mutation accepted' then raise;end if;end;
+ if has_function_privilege('authenticated','public.cmd_worker_key(uuid)','EXECUTE') then raise exception 'Browser can access secrets';end if;
+ if has_table_privilege('authenticated','public.cmd_jobs','UPDATE') then raise exception 'Browser can rewrite job state';end if;
+end $$;
+reset role;
+select 'PASS: capacity, shutdown reservations, worker lease, capacity reduction, tenant isolation, Vault, browser permissions' as result;
+rollback;

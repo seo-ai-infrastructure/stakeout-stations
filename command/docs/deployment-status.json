@@ -1,1 +1,43 @@
-{"supabase":{"project_id":"rgaxccniacasrabfnpsp","schema_status":"APPLIED","migration":"command_scheduler","verification":"passed with rollback"},"railway":{"project_id":"486ee0a9-a9d5-4309-92d9-587397ac56c6","environment_id":"83dbbb9f-6764-4475-8a16-7437400ca86e","service_id":"d3f214fe-3cc6-46eb-aa7a-d5ff8d654d8b","service_name":"command-scheduler","status":"CONFIGURED_AWAITING_GITHUB_SOURCE"},"vercel":{"name":"stakeout-command","preview_submission":"dpl_DwD79y1gsWodp33XHThBwTUwiZu7","production_submission":"dpl_3XAK5ZtHDuMX8CFA7MU7Mv5yHJyB","returned_url":"https://stakeout-command-aq6tmr4y3-brockmisner13211321-6243s-projects.vercel.app","returned_alias":"https://stakeout-command-brockmisner13211321-6243s-projects.vercel.app","status":"SUBMITTED_NOT_VERIFIED","verification_error":"Deployment lookup returned 404; URL displayed Vercel authentication"},"github":{"attempted_repository":"seo-ai-infrastructure/stakeout-stations","attempted_branch":"feat/stakeout-command","status":"WRITE_BLOCKED","error":"403 Resource not accessible by integration","remote_modified":false},"live_devices_tested":false}
+{
+  "supabase": {
+    "project_id": "rgaxccniacasrabfnpsp",
+    "schema_status": "APPLIED",
+    "migration": "command_daily_drain",
+    "verification": "Automatic capacity, atomic handoff, overdue work, lease, RLS and Vault checks passed with rollback"
+  },
+  "railway": {
+    "project_id": "486ee0a9-a9d5-4309-92d9-587397ac56c6",
+    "environment_id": "83dbbb9f-6764-4475-8a16-7437400ca86e",
+    "service_id": "d3f214fe-3cc6-46eb-aa7a-d5ff8d654d8b",
+    "service_name": "command-scheduler",
+    "status": "DEPLOYMENT_PENDING",
+    "deployment_id": "3e506390-aeb0-436d-8681-7b50d784ed88",
+    "root": "/command",
+    "branch": "feat/command-daily-drain",
+    "verification": "BUILDING; source snapshot and image build pending; no logs or healthy response yet"
+  },
+  "vercel": {
+    "name": "stakeout-command",
+    "preview_submission": "dpl_DwD79y1gsWodp33XHThBwTUwiZu7",
+    "production_submission": "dpl_3XAK5ZtHDuMX8CFA7MU7Mv5yHJyB",
+    "returned_url": "https://stakeout-command-aq6tmr4y3-brockmisner13211321-6243s-projects.vercel.app",
+    "returned_alias": "https://stakeout-command-brockmisner13211321-6243s-projects.vercel.app",
+    "status": "BLOCKED_ACCOUNT_MISMATCH",
+    "verification_error": "Current connection only exposes hoffman's projects, not the intended Brock workspace; no new deployment submitted"
+  },
+  "github": {
+    "attempted_repository": "seo-ai-infrastructure/stakeout-stations",
+    "attempted_branch": "feat/stakeout-command",
+    "status": "PUBLISHED",
+    "remote_modified": true,
+    "branch": "feat/command-daily-drain",
+    "directory": "command"
+  },
+  "live_devices_tested": false,
+  "verification": {
+    "build": "passed",
+    "tests": 16,
+    "browser": "local preview blocked by managed browser",
+    "live_devices_tested": false
+  }
+}

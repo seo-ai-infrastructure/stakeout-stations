@@ -1,6 +1,6 @@
 begin;
 -- Disposable fixtures: this entire transaction rolls back.
-do $$ declare u uuid:=gen_random_uuid();other uuid:=gen_random_uuid();worker uuid:=gen_random_uuid();d uuid;t uuid;n int;claimed uuid;begin
+do $$ declare u uuid:=gen_random_uuid();other uuid:=gen_random_uuid();worker uuid:=gen_random_uuid();d uuid;t uuid;n int;claimed uuid;next_id uuid;begin
  insert into auth.users(id,email) values(u,u::text||'@command-test.invalid'),(other,other::text||'@command-test.invalid');
  perform set_config('request.jwt.claim.sub',u::text,true);
  perform public.cmd_action('bootstrap','{}');
@@ -26,7 +26,27 @@ do $$ declare u uuid:=gen_random_uuid();other uuid:=gen_random_uuid();worker uui
  select count(*) into n from public.cmd_jobs where workspace_id=u and status='starting';if n<>3 then raise exception 'Released slot was not refilled';end if;
  update public.cmd_workspaces set verified_capacity=1 where id=u;perform public.cmd_claim(u,worker);
  select count(*) into n from public.cmd_jobs where workspace_id=u and status='starting';if n<>3 then raise exception 'Capacity reduction interrupted active jobs';end if;
- perform set_config('command.test_owner',u::text,true);
+ update public.cmd_workspaces set capacity=1,verified_capacity=5 where id=u;
+ perform public.cmd_action('settings','{"capacity":99}');
+ if (select capacity from public.cmd_workspaces where id=u)<>5 then raise exception 'User overrode provider capacity';end if;
+ perform public.cmd_claim(u,worker);perform public.cmd_claim(u,worker);perform public.cmd_claim(u,worker);
+ select count(*) into n from public.cmd_jobs where workspace_id=u and status='starting';if n<>5 then raise exception 'Dynamic capacity increase failed';end if;
+ select id,device_id into claimed,d from public.cmd_jobs where workspace_id=u and status='starting' limit 1;
+ update public.cmd_devices set power='on',last_seen=now() where id=d;
+ update public.cmd_jobs set status='stopping',outcome='completed' where id=claimed;
+ insert into public.cmd_jobs(workspace_id,occurrence_key,device_id,template_id,due_at,deadline_at,provider_name,template_snapshot)
+ values(u,'continuation',d,t,now()-interval '1 day',now()-interval '1 minute','continue-test','{}') returning id into next_id;
+ perform public.cmd_continue(u,worker,claimed);
+ if (select status from public.cmd_jobs where id=claimed)<>'completed' or (select status from public.cmd_jobs where id=next_id)<>'starting' then raise exception 'Atomic continuation failed';end if;
+ update public.cmd_workspaces set verified_capacity=1 where id=u;
+ if exists(select 1 from public.cmd_claim(u,worker)) then raise exception 'Over-capacity dispatch accepted';end if;
+ update public.cmd_jobs set status='stopping',outcome='completed' where id=next_id;
+ if exists(select 1 from public.cmd_continue(u,worker,next_id)) then raise exception 'Over-capacity continuation accepted';end if;
+ update public.cmd_jobs set status='completed',finished_at=now() where workspace_id=u and status in ('starting','stopping');
+ update public.cmd_devices set power='off' where workspace_id=u;
+ update public.cmd_jobs set deadline_at=now()-interval '1 day' where workspace_id=u and status='queued';
+ if not exists(select 1 from public.cmd_claim(u,worker)) then raise exception 'Overdue queue did not drain';end if;
+ perform set_config('command.test_owner' ,u::text,true);
  perform set_config('command.test_other',other::text,true);
 end $$;
 set local role authenticated;
@@ -37,5 +57,5 @@ do $$ declare n int;begin
  if has_table_privilege('authenticated','public.cmd_jobs','UPDATE') then raise exception 'Browser can rewrite job state';end if;
 end $$;
 reset role;
-select 'PASS: capacity, shutdown reservations, worker lease, capacity reduction, tenant isolation, Vault, browser permissions' as result;
+select 'PASS: automatic capacity, atomic continuation, overdue queue, shutdown reservations, worker lease, capacity reduction, tenant isolation, Vault, browser permissions' as result;
 rollback;

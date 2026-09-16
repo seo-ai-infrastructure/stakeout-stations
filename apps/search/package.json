@@ -10,17 +10,21 @@
     "prebuild": "node scripts/prepare-map-worker.mjs"
   },
   "dependencies": {
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.116.0",
+    "lucide-react": "1.43.0",
+    "maplibre-gl": "6.8.0",
     "next": "16.3.5",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "lucide-react": "1.43.0",
-    "maplibre-gl": "6.8.0"
+    "zod": "4.5.4"
   },
   "devDependencies": {
-    "typescript": "7.0.2",
+    "@electric-sql/pglite": "0.5.8",
     "@types/node": "26.5.0",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.7",
-    "tsx": "4.23.13"
+    "tsx": "4.23.13",
+    "typescript": "7.0.2"
   }
 }

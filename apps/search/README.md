@@ -33,3 +33,17 @@ The map uses CARTO raster tiles with OpenStreetMap attribution for this preview.
 Charcoal background `#0e1318`, panels `#171d23`, borders `#2a323b`, emerald `#36e5ac`, warmup amber `#f0b937`. Desktop rail 220 px; page gutter 24 px. Native text and controls, outlined Lucide icons, 8 px panel radius. Main composition: campaign heading, lifecycle, three metrics, map/evidence split, schedule.
 
 Intentional departures from the generated concept: removed the unverified “all systems operational” claim; unavailable video has no play button; example tasks never say “in progress”; competitor examples are named as examples. Added campaign selection and an accessible location list. Real map geography replaces the image-generated map.
+
+## Account release — September 16
+
+The application root now requires verified Supabase authentication. The previous illustrative dashboard is at `/demo`. Customers can create a workspace, save validated campaign drafts to Supabase, switch workspaces, and export drafts. The initial business fields use Stakeout Search and https://stakeoutsearch.com. This is a separate application; the existing marketing homepage and white-label page are unchanged.
+
+`search_campaigns` has RLS. Workspace members can read their organization's drafts; only owners/admins can insert them. Browser roles cannot update status, delete records, or activate campaigns. The API independently verifies the user and workspace role. No service-role key is used by this app.
+
+Deployment: https://stakeout-search-app.vercel.app
+
+Required Supabase Auth URL configuration: add `https://stakeout-search-app.vercel.app/auth/callback` under Authentication → URL Configuration → Redirect URLs. Keep the existing Site URL and existing redirect entries. The current connector cannot read or update this setting, so email-link completion is unverified. No test emails were sent.
+
+Vercel project: `stakeout-search-app` (`prj_xQ6nbBCyCnDbK2IZB7MOxcZtfXwO`). Deployment files include public Supabase configuration in `.env.production`; no privileged credentials are embedded. Configure the two `.env.example` keys in project settings before switching to Git-driven builds. The app is deployed independently and is not connected to the repository's main-branch auto-deploy.
+
+Supersedes the earlier launch-gate description for login code and campaign persistence: these are implemented and the database migration is applied. Email round-trip and authenticated production save still need end-to-end verification. Billing, provisioning, task dispatch, and capture ingestion remain unimplemented in this app.

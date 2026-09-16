@@ -28,3 +28,13 @@ The approved generated concept and desktop/mobile render screenshots were opened
 | Responsive | Rail becomes labeled mobile navigation; map and evidence stack; draft dialog remains within the viewport. |
 
 This is a functional preview, not full design or production sign-off. Tile rendering and live evidence playback are explicitly unverified. Auth, payments, tenant persistence, scheduling, capture ingestion, and provisioning remain unimplemented in this app.
+
+## Account release checks
+
+- Added schema/API validation and actual PostgreSQL RLS tests using PGlite: 5 tests pass in total.
+- Verified owner insertion; foreign-workspace insertion denied; foreign-workspace reads empty; member insertion denied; client status mutation denied.
+- Hosted database verification: RLS enabled, two policies present, anon SELECT denied, authenticated UPDATE denied.
+- Hosted `/api/campaigns`: HTTP 401 for signed-out requests, private/no-store response.
+- Connected Browser loaded the deployed login form. Email round-trip and an authenticated production save are not tested because the Auth callback allowlist cannot be managed by the available connector.
+- Supabase security advisor reported no new table-policy warnings. Existing project warning: leaked-password protection disabled (this app uses email-link auth); unrelated private credential tables intentionally have no browser policies. See https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection.
+- Existing marketing homepage and white-label page were not modified or redeployed.

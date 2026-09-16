@@ -15,6 +15,9 @@ export default function ObservationMap({selected, onSelect}: {selected:string; o
     try { map = new maplibregl.Map({container:container.current, center:[-80.133,25.777],zoom:13.8, attributionControl:{compact:true},style:{version:8,sources:{basemap:{type:'raster',tiles:['https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'],tileSize:256,attribution:'© OpenStreetMap contributors © CARTO'}},layers:[{id:'basemap',type:'raster',source:'basemap'}]}}); }
     catch { setFailed(true); return; }
     map.on('error',()=>setFailed(true));
+    const fitPoints = () => map.fitBounds([[-80.141,25.768],[-80.125,25.786]],{padding:55,duration:0});
+    fitPoints();
+    map.on('resize',fitPoints);
     map.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-right');
     markers.current=demoPoints.map(p=>{
       const element = document.createElement('button'); element.type='button';

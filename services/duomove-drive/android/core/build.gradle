@@ -1,0 +1,12 @@
+plugins { id 'java-library' }
+java { sourceCompatibility=JavaVersion.VERSION_11; targetCompatibility=JavaVersion.VERSION_11 }
+dependencies {
+    compileOnly 'org.json:json:20240303'
+    testImplementation 'org.json:json:20240303'
+}
+tasks.register('engineTest', JavaExec) {
+    dependsOn testClasses
+    classpath=sourceSets.test.runtimeClasspath
+    mainClass='net.stakeout.duomove.core.EngineTest'
+    systemProperty 'duomove.fixture', rootProject.file('../fixtures/contract-plan.json').absolutePath
+}

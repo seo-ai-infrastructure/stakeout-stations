@@ -1,0 +1,42 @@
+name: DuoMove Drive
+on:
+  push:
+    paths: ['services/duomove-drive/**', '.github/workflows/duomove-drive.yml']
+  pull_request:
+    paths: ['services/duomove-drive/**', '.github/workflows/duomove-drive.yml']
+permissions:
+  contents: read
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/duomove-drive
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
+      - run: sdkmanager 'platforms;android-34' 'build-tools;34.0.0'
+      - run: pip install -r requirements.lock && pip install -e '.[test]'
+      - run: pytest -q
+      - run: node --test integration/controller-client.test.mjs
+      - run: docker build --tag duomove-drive:ci .
+      - run: ./gradlew --no-daemon :core:engineTest :player:assembleDebug :player:lintDebug
+        working-directory: services/duomove-drive/android
+      - uses: actions/upload-artifact@v4
+        with:
+          name: duomove-drive-player-debug
+          path: services/duomove-drive/android/player/build/outputs/apk/debug/player-debug.apk
+          if-no-files-found: error

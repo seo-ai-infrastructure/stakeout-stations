@@ -1,0 +1,53 @@
+{
+  "version": "1.0.0",
+  "verified_date_utc": "2026-09-17",
+  "base_commit": "6d386dc47e4e1c1fe319b4bb1d502c1486a6cdd7",
+  "checks": {
+    "python": {
+      "passed": 33,
+      "warnings": 1,
+      "warning": "Third-party Starlette/AnyIO deprecated BlockingPortal alias"
+    },
+    "node_controller_adapter": {
+      "passed": 5
+    },
+    "java_playback_and_python_contract": {
+      "assertions_passed": 39
+    },
+    "android_assembleDebug": "passed",
+    "android_lintDebug": {
+      "errors": 0,
+      "warnings": 2,
+      "warning": "Inlined ProviderProperties constants preserve the legacy API 29 integer values"
+    },
+    "apk_signature_v2": "verified",
+    "service_http_smoke": {
+      "ipv4": "passed",
+      "ipv6": "passed",
+      "authentication": "passed",
+      "shutdown": "Application shutdown complete after SIGTERM; Uvicorn propagates SIGTERM exit status"
+    },
+    "osrm_route_smoke": {
+      "distance_m": 4950.7,
+      "duration_seconds": 543.0,
+      "samples": 544
+    }
+  },
+  "apk": {
+    "filename": "DuoMove-Drive-1.0.0-debug.apk",
+    "sha256": "620d7714280e98048a16d7fcd0320fed3d8925c7377997eadad4b99adfcd5dbf",
+    "bytes": 5997706,
+    "application_id": "net.stakeout.duomove.player",
+    "minimum_android_api": 29,
+    "target_android_api": 34,
+    "signing": "debug",
+    "certificate_sha256": "e491a1530d21de5adedfea0c166dff502ca773fb60a1667e88ad9bd0320fe451"
+  },
+  "not_verified": [
+    "Installation and provider playback on a live DuoPlus phone",
+    "Observation by Google Maps or another target app",
+    "Production Railway deployment and Docker image (no local Docker daemon)",
+    "Integration with missing existing worker modules"
+  ],
+  "behavior": "Uses supported synthetic mock locations; mock flags are retained"
+}

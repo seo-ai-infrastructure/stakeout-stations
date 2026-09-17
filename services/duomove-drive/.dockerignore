@@ -1,0 +1,12 @@
+**/__pycache__
+**/*.pyc
+**/*.egg-info
+.venv
+.pytest_cache
+android
+tests
+fixtures
+integration
+*.token
+.env*
+*.sqlite3*

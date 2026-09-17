@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">DuoMove Drive</string>
+    <string name="stop_drive">Stop drive</string>
+    <string name="playback_note">Synthetic location playback • 1 Hz target\nCallback counts below belong to this player app.</string>
+</resources>

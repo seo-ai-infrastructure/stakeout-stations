@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=75,<83"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "duomove-drive"
+version = "1.0.0"
+description = "Deterministic route planning and leased Android location playback for DuoPlus"
+requires-python = ">=3.12"
+dependencies = ["fastapi==0.128.2", "uvicorn==0.40.0"]
+
+[project.optional-dependencies]
+test = ["pytest==8.3.5", "httpx==0.28.1"]
+
+[project.scripts]
+duomove-drive = "duomove_drive.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

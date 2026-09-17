@@ -38,3 +38,15 @@ This is a functional preview, not full design or production sign-off. Tile rende
 - Connected Browser loaded the deployed login form. Email round-trip and an authenticated production save are not tested because the Auth callback allowlist cannot be managed by the available connector.
 - Supabase security advisor reported no new table-policy warnings. Existing project warning: leaked-password protection disabled (this app uses email-link auth); unrelated private credential tables intentionally have no browser policies. See https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection.
 - Existing marketing homepage and white-label page were not modified or redeployed.
+
+## Billing, scheduling and ingestion release — September 17
+
+Supersedes earlier statements that these modules were unimplemented:
+
+- Production Next.js build and TypeScript pass; 12 automated tests pass.
+- Stripe signature tampering is rejected. Database tests verify exclusive billing leases and event deduplication.
+- Real PostgreSQL migration tests exercise queued recurring runs, shared device capacity, campaign concurrency, retained uncertain reservations, stale inventory, worker fencing and unpaid scheduling rejection.
+- Browser roles cannot call privileged scheduler RPCs or mutate billing; organization isolation is exercised for operation tables.
+- Capture tests exercise expiring/scoped tokens, reserved variables, artifact MIME validation, XML entity rejection and visible-node extraction.
+- No live Stripe payment, DuoPlus device task, or real artifact upload has been performed. Video playback, approved-template variable compatibility, and provider reconciliation still need a configured pilot.
+- The schema is additive. New device/template defaults and worker configuration prevent automatic provider execution on deployment.

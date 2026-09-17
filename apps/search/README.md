@@ -1,6 +1,8 @@
-# Stakeout Search — customer workspace preview
+# Stakeout Search
 
-An isolated Next.js application for the managed search product. The existing station console and Railway worker are unchanged. Run commands from this directory, not the incomplete repository root.
+Managed local-search observation workspace. Customer UI: https://stakeout-search-app.vercel.app. Marketing homepage and white-label page are outside this app.
+
+## Run locally
 
 ```sh
 npm ci
@@ -9,41 +11,83 @@ npm run build
 npm start
 ```
 
-Set a Vercel project's root directory to `apps/search` to build this app. No provider environment variables are needed for this **local-data preview**. This branch is not linked to or deployed over the existing production services.
+Run from `apps/search`, not the incomplete repository root. Copy `.env.example` and configure public Supabase settings for authentication. `/demo` contains explicitly illustrative data; the authenticated root uses organization-scoped records.
 
-## Implemented
+## Services
 
-- Responsive campaign workspace based on the approved dark command-center concept.
-- MapLibre geographic map with selectable sample observations and paired competitor details.
-- Explicit missing-capture semantics; no simulated playable recordings or success events.
-- Accessible native campaign dialog with duration/capacity/surface validation.
-- Browser-persisted drafts, campaign selection, and JSON draft export.
-- Sample schedules, device inventory, and managed-service settings.
+- **Vercel:** Next.js UI, email-link authentication, workspace and campaign drafts. Operational API routes proxy to `SEARCH_BACKEND_ORIGIN`; privileged keys never reach browser bundles.
+- **Railway search-api:** the same Next.js API code, Supabase server credentials, Stripe integration and private evidence ingestion. Build `Dockerfile.api` with root `/apps/search`. Health: `/api/health`.
+- **Railway search-worker:** persistent task dispatcher, build `Dockerfile.worker`, root `/apps/search`, health `/health`. Starts with `SEARCH_WORKER_ENABLED=false`, `SEARCH_MAX_SLOTS=0`.
+- **Supabase:** existing organizations/members plus search campaigns, subscriptions, assigned devices, approved templates, routines, durable runs and captures. The private `search-evidence` bucket serves five-minute signed playback links.
 
-## Launch gates still open
+Existing station services and their credentials are not changed. The new services can reference the existing project's Supabase server credential through Railway reference variables. Do not set `SEARCH_BACKEND_ORIGIN` on search-api (that would proxy back to itself).
 
-This is not yet a production SaaS or an activated campaign engine. Browser drafts are not authenticated, synchronized customer records. Checkout does not exist. No live provider call is made. Models, per-device locations/proxies, routine templates, scheduling, and reset/provisioning need backend integration.
+## Authentication callback
 
-Next work: organization-scoped Supabase campaign persistence and authentication; Stripe checkout/webhook entitlements; managed credential storage separate from the existing BYOK console; a durable scheduler with shared capacity leases and reconciliation; capture ingestion and extraction; private screenshot/XML/video storage with signed playback access; measured pilot reports. Do not charge for automated fulfillment until the corresponding end-to-end path is verified.
+Project **stakeout-stations**, `rgaxccniacasrabfnpsp`:
+https://supabase.com/dashboard/project/rgaxccniacasrabfnpsp/auth/url-configuration
 
-The map uses CARTO raster tiles with OpenStreetMap attribution for this preview. Confirm a production tile plan before commercial launch.
+Add `https://stakeout-search-app.vercel.app/auth/callback` to Redirect URLs. Retain the existing Site URL and entries. Email round-trip remains unverified until this account setting is confirmed.
 
-## Design system
+## Billing activation
 
-Charcoal background `#0e1318`, panels `#171d23`, borders `#2a323b`, emerald `#36e5ac`, warmup amber `#f0b937`. Desktop rail 220 px; page gutter 24 px. Native text and controls, outlined Lucide icons, 8 px panel radius. Main composition: campaign heading, lifecycle, three metrics, map/evidence split, schedule.
+On **search-api**, configure `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, an active recurring `STRIPE_PRICE_ID`, and positive `PLAN_DEVICE_LIMIT` / `PLAN_PARALLEL_LIMIT` (parallel must not exceed devices). Set `APP_URL` to the Vercel app origin. Configure Stripe's customer portal.
 
-Intentional departures from the generated concept: removed the unverified “all systems operational” claim; unavailable video has no play button; example tasks never say “in progress”; competitor examples are named as examples. Added campaign selection and an accessible location list. Real map geography replaces the image-generated map.
+Webhook URL: `https://stakeout-search-app.vercel.app/api/billing/webhook`. Subscribe to `checkout.session.completed`, `customer.subscription.*`, `invoice.paid`, and `invoice.payment_failed`. Raw-body signature verification is required. Webhooks re-read current Stripe subscriptions under a database lease, so delayed events do not replay stale subscription state. Event IDs are deduplicated transactionally. No amount or entitlement is taken from browser input. One configured plan is supported in this release.
 
-## Account release — September 16
+Owners can subscribe/manage billing. Scheduling requires an active or trialing subscription with an unexpired period and valid allowances. Checkout checks existing Stripe subscriptions and reuses open sessions. Test-mode payment, renewal, failure, cancellation, and portal flows must pass before accepting live payments. No prices or paid subscriptions are created by this code's deployment.
 
-The application root now requires verified Supabase authentication. The previous illustrative dashboard is at `/demo`. Customers can create a workspace, save validated campaign drafts to Supabase, switch workspaces, and export drafts. The initial business fields use Stakeout Search and https://stakeoutsearch.com. This is a separate application; the existing marketing homepage and white-label page are unchanged.
+## Device scheduling activation
 
-`search_campaigns` has RLS. Workspace members can read their organization's drafts; only owners/admins can insert them. Browser roles cannot update status, delete records, or activate campaigns. The API independently verifies the user and workspace role. No service-role key is used by this app.
+1. Set a company-managed `DUOPLUS_API_KEY`, its actual `DUOPLUS_TIMEZONE`, and an operator-approved `SEARCH_MAX_SLOTS` on search-worker. Never use customer/provider keys in browser configuration.
+2. Operators register existing assigned devices in `search_managed_devices` (one organization per device), and validated DuoPlus templates in `search_templates`. Templates and devices default to disabled. Match the provider's variable schema exactly; only reviewed templates should be enabled.
+3. Configure the same random `CAPTURE_SIGNING_SECRET` (at least 32 characters) on API and worker. Capture-enabled templates must accept `stakeout_run_id`, `stakeout_capture_token`, `stakeout_capture_url` and export their real artifacts using the protocol below.
+4. Enroll a paid pilot workspace, assign its dedicated devices, approve its templates, then enable the worker. An existing external controller must not also control those devices. Use a dedicated provider pool or coordinate controllers: inventory can count externally powered devices but cannot lock another controller's pending power-on requests.
 
-Deployment: https://stakeout-search-app.vercel.app
+Customers schedule daily/weekly (or N-day) routines with custom variables, first-run time and count. Repetition uses fixed UTC day intervals; local wall-clock time can shift across daylight-saving changes. Pausing stops future dispatch; it does not cancel a provider task already submitted. This version does not automatically provision/reset devices, buy proxies, create accounts, or generate warmup routines.
 
-Required Supabase Auth URL configuration: add `https://stakeout-search-app.vercel.app/auth/callback` under Authentication → URL Configuration → Redirect URLs. Keep the existing Site URL and existing redirect entries. The current connector cannot read or update this setting, so email-link completion is unverified. No test emails were sent.
+Dispatch serializes shared slot allocation, checks current provider subscription capacity, counts externally powered/unknown devices, enforces plan and campaign parallel limits, and prevents overlapping use of a device. The provider gate spaces calls at least 1.25 seconds apart. Reserved slots stay held through shutdown confirmation. An ambiguous task submission is reconciled by its unique name; it is never blindly retried. `attention` runs intentionally retain their slot until reconciled. Operators must confirm provider task and power state before manually resolving an attention run; never clear it just because a lease elapsed.
 
-Vercel project: `stakeout-search-app` (`prj_xQ6nbBCyCnDbK2IZB7MOxcZtfXwO`). Deployment files include public Supabase configuration in `.env.production`; no privileged credentials are embedded. Configure the two `.env.example` keys in project settings before switching to Git-driven builds. The app is deployed independently and is not connected to the repository's main-branch auto-deploy.
+## Real capture ingestion
 
-Supersedes the earlier launch-gate description for login code and campaign persistence: these are implemented and the database migration is applied. Email round-trip and authenticated production save still need end-to-end verification. Billing, provisioning, task dispatch, and capture ingestion remain unimplemented in this app.
+The worker supplies a run-scoped, expiring HMAC token to the approved RPA template. That template/controlled ADB runner must collect and upload real artifacts. Scheduling alone does not create a screen recording.
+
+`POST /api/captures/prepare` with Bearer token and this manifest (local upload helper also accepts `file` on artifacts):
+
+```json
+{
+  "stage": "local-finder",
+  "observedAt": "2026-09-17T12:00:00.000Z",
+  "context": {
+    "surface": "Chrome Local Finder",
+    "keyword": "local seo",
+    "lat": 28.0395,
+    "lng": -81.9498,
+    "locationVerified": false,
+    "locationEvidence": "Not independently verified",
+    "viewport": {"width": 1080, "height": 2340}
+  },
+  "artifacts": [
+    {"kind": "xml", "mime": "application/xml", "file": "window.xml"},
+    {"kind": "screenshot", "mime": "image/png", "file": "screen.png"},
+    {"kind": "video", "mime": "video/mp4", "file": "recording.mp4"}
+  ]
+}
+```
+
+Supply a UUID `id` and each file's `bytes` for direct HTTP calls. The helper generates them:
+
+```sh
+# Set STAKEOUT_CAPTURE_URL and STAKEOUT_CAPTURE_TOKEN securely in the runner environment.
+node scripts/upload-capture.mjs manifest.json
+```
+
+The helper streams files directly to the returned signed storage upload URLs, then calls `/api/captures/complete`. File sizes, MIME types and signatures are checked before evidence becomes visible. XML and screenshots receive SHA-256 hashes; video header is range-checked (no whole-video hash). XML entities/DTDs are rejected and offscreen/hidden nodes excluded. A successful provider task without uploaded evidence still shows no capture.
+
+A retry of `/complete` for the same ID is idempotent. If upload fails, retain the capture ID printed by the helper; retry missing artifacts using the original signed URLs before completing. No fake screenshot/video is inserted for demonstration. GPS/IP context is capture-runner-reported, not an independent attestation. Visible XML text is extracted; surface-specific rank classification and competitor matching remain follow-up work.
+
+## Verification and remaining activation
+
+See `VERIFICATION.md`. Live Stripe transactions, customer email login, and actual DuoPlus artifact capture require configured credentials and a pilot. Code and database tests do not replace these live integration checks. No paid provider executions are triggered during deployment.
+
+Official interfaces: https://docs.stripe.com/billing/subscriptions/webhooks and https://help.duoplus.net/docs/Create-Scheduled-Task. Stripe SDK is pinned; provider endpoints are called only by the server worker.

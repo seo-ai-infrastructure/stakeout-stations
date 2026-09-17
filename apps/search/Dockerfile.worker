@@ -1,0 +1,8 @@
+FROM node:24-bookworm-slim
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --include=dev
+COPY lib ./lib
+COPY worker ./worker
+ENV NODE_ENV=production
+CMD ["node", "--import", "tsx", "worker/index.ts"]

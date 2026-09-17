@@ -4,6 +4,8 @@ A multi-tenant station console for DuoPlus, with a Next.js dashboard, Supabase A
 
 For the audited operator workflow and differences from the supplied Observatory guide, see [operating-guide.md](docs/operating-guide.md).
 
+For timed DuoPlus drive simulations, see [DuoMove Drive](services/duomove-drive/README.md): an independently buildable route planner, private Railway service, and Android location player.
+
 ## Runtime boundaries
 
 | Component | Responsibility |

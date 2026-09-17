@@ -184,28 +184,97 @@ test("durable pool enforces slots, holds uncertain runs, and denies public RPCs"
       0,
     );
     // Increasing the account and provider allowance must not bypass a campaign limit.
-    const otherDevice=randomUUID();
-    await db.query("insert into search_managed_devices(id,org_id,provider_id,name,enabled,power,observed_at) values($1,$2,'phone2','Second',true,'off',now())",[otherDevice,org]);
-    await db.query("update search_billing set parallel_limit=2 where org_id=$1",[org]);
-    await db.query("select search_schedule($1,$2,$3,$4,'Second','template',2,'{}','Maps','seo',now(),1,1)",[org,campaign,otherDevice,randomUUID()]);
-    await db.query("select search_worker_inventory($1,0,2,$2)",[leader,JSON.stringify({phone:'off',phone2:'off'})]);
-    assert.equal((await db.query("select * from search_claim($1)",[leader])).rows.length,0);
+    const otherDevice = randomUUID();
+    await db.query(
+      "insert into search_managed_devices(id,org_id,provider_id,name,enabled,power,observed_at) values($1,$2,'phone2','Second',true,'off',now())",
+      [otherDevice, org],
+    );
+    await db.query(
+      "update search_billing set parallel_limit=2 where org_id=$1",
+      [org],
+    );
+    await db.query(
+      "select search_schedule($1,$2,$3,$4,'Second','template',2,'{}','Maps','seo',now(),1,1)",
+      [org, campaign, otherDevice, randomUUID()],
+    );
+    await db.query("select search_worker_inventory($1,0,2,$2)", [
+      leader,
+      JSON.stringify({ phone: "off", phone2: "off" }),
+    ]);
+    assert.equal(
+      (await db.query("select * from search_claim($1)", [leader])).rows.length,
+      0,
+    );
     // Another worker cannot mutate a reservation, and stale inventory cannot allocate.
-    assert.equal((await db.query("select search_run_update($1,$2,'attention','failed') ok",[randomUUID(),(claimed.rows[0] as any).id])).rows[0].ok,false);
-    await db.query("update search_runs set status='failed' where id=$1",[(claimed.rows[0] as any).id]);
-    await db.exec("update private.search_pool set observed_at=now()-interval '1 minute'");
-    assert.equal((await db.query("select * from search_claim($1)",[leader])).rows.length,0);
+    assert.equal(
+      (
+        await db.query<{ ok: boolean }>(
+          "select search_run_update($1,$2,'attention','failed') ok",
+          [randomUUID(), (claimed.rows[0] as any).id],
+        )
+      ).rows[0].ok,
+      false,
+    );
+    await db.query("update search_runs set status='failed' where id=$1", [
+      (claimed.rows[0] as any).id,
+    ]);
+    await db.exec(
+      "update private.search_pool set observed_at=now()-interval '1 minute'",
+    );
+    assert.equal(
+      (await db.query("select * from search_claim($1)", [leader])).rows.length,
+      0,
+    );
     // Leases serialize billing changes and event replay cannot replace an applied event.
-    const billingToken=randomUUID();
-    assert.equal((await db.query('select search_billing_lock($1,$2) ok',[org,billingToken])).rows[0].ok,true);
-    assert.equal((await db.query('select search_billing_lock($1,$2) ok',[org,randomUUID()])).rows[0].ok,false);
-    await db.query("select search_billing_apply($1,$2,'evt_fixture','sub_fixture','active','price_fixture',2,2,now()+interval '1 day')",[org,billingToken]);
-    await db.query('select search_billing_lock($1,$2)',[org,billingToken]);
-    await db.query("select search_billing_apply($1,$2,'evt_fixture',null,'canceled',null,0,0,null)",[org,billingToken]);
-    assert.equal((await db.query('select status from search_billing where org_id=$1',[org])).rows[0].status,'active');
-    await db.query("select set_config('request.jwt.claim.sub',$1,false)",[randomUUID()]);
+    const billingToken = randomUUID();
+    assert.equal(
+      (
+        await db.query<{ ok: boolean }>(
+          "select search_billing_lock($1,$2) ok",
+          [org, billingToken],
+        )
+      ).rows[0].ok,
+      true,
+    );
+    assert.equal(
+      (
+        await db.query<{ ok: boolean }>(
+          "select search_billing_lock($1,$2) ok",
+          [org, randomUUID()],
+        )
+      ).rows[0].ok,
+      false,
+    );
+    await db.query(
+      "select search_billing_apply($1,$2,'evt_fixture','sub_fixture','active','price_fixture',2,2,now()+interval '1 day')",
+      [org, billingToken],
+    );
+    await db.query("select search_billing_lock($1,$2)", [org, billingToken]);
+    await db.query(
+      "select search_billing_apply($1,$2,'evt_fixture',null,'canceled',null,0,0,null)",
+      [org, billingToken],
+    );
+    assert.equal(
+      (
+        await db.query<{ status: string }>(
+          "select status from search_billing where org_id=$1",
+          [org],
+        )
+      ).rows[0].status,
+      "active",
+    );
+    await db.query("select set_config('request.jwt.claim.sub',$1,false)", [
+      randomUUID(),
+    ]);
     await db.exec("set role authenticated");
-    for(const table of ['search_billing','search_managed_devices','search_routines','search_runs','search_captures'])assert.equal((await db.query('select * from '+table)).rows.length,0);
+    for (const table of [
+      "search_billing",
+      "search_managed_devices",
+      "search_routines",
+      "search_runs",
+      "search_captures",
+    ])
+      assert.equal((await db.query("select * from " + table)).rows.length, 0);
 
     await assert.rejects(db.query("select * from search_claim($1)", [leader]));
     await assert.rejects(db.exec("update search_billing set status='active'"));

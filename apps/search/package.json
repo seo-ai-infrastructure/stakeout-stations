@@ -1,0 +1,33 @@
+{
+  "name": "stakeout-search",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "build": "next build",
+    "start": "next start --hostname 0.0.0.0",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test lib/*.test.ts",
+    "prebuild": "node scripts/prepare-map-worker.mjs",
+    "worker": "node --import tsx worker/index.ts"
+  },
+  "dependencies": {
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.116.0",
+    "fast-xml-parser": "5.5.8",
+    "lucide-react": "1.43.0",
+    "maplibre-gl": "6.8.0",
+    "next": "16.3.5",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "stripe": "22.6.2",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "@types/node": "26.5.0",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "tsx": "4.23.13",
+    "typescript": "7.0.2"
+  }
+}

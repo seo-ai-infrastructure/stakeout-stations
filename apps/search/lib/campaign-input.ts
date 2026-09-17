@@ -1,0 +1,3 @@
+import {z} from 'zod';
+import {surfaces} from './campaign';
+export const campaignInput=z.object({id:z.uuid(),orgId:z.uuid(),business:z.string().trim().min(1).max(160),listing:z.url().max(2048).refine(v=>new URL(v).protocol==='https:'),location:z.string().trim().min(1).max(160),keywords:z.array(z.string().trim().min(1).max(200)).min(1).max(100),days:z.number().int().min(11).max(45),warmup:z.number().int().min(10).max(30),devices:z.number().int().min(1).max(100),concurrency:z.number().int().min(1).max(100),surfaces:z.array(z.enum(surfaces)).min(1).max(8)}).refine(v=>v.warmup<v.days,{message:'Warmup must leave a tracking day'}).refine(v=>v.concurrency<=v.devices,{message:'Concurrency cannot exceed devices'});
